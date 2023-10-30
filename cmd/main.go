@@ -5,6 +5,7 @@ import (
 
 	"github.com/nvtrinh2001/chatapp/db"
 	"github.com/nvtrinh2001/chatapp/internal/user"
+	"github.com/nvtrinh2001/chatapp/internal/ws"
 	"github.com/nvtrinh2001/chatapp/router"
 )
 
@@ -18,6 +19,10 @@ func main() {
 	userService := user.NewService(userRepository)
 	userHandler := user.NewHandler(userService)
 
-	router.InitRouter(userHandler)
+	hub := ws.NewHub()
+	wsHandler := ws.NewHandler(hub)
+	go hub.Run()
+
+	router.InitRouter(userHandler, wsHandler)
 	router.Start("0.0.0.0:8080")
 }
