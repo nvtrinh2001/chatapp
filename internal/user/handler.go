@@ -33,6 +33,27 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *Handler) ChangeUsername(c *gin.Context) {
+	var request ChangeUsernameRequest
+
+	userId := c.Param("userId")
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	request.ID = userId
+
+	response, err := h.Service.ChangeUsername(c.Request.Context(), &request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *Handler) Login(c *gin.Context) {
 	var request LoginUserRequest
 

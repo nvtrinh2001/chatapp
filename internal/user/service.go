@@ -2,11 +2,11 @@ package user
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/nvtrinh2001/chatapp/pkg/utils"
+	"github.com/nvtrinh2001/chatapp/proto/user"
+	"github.com/nvtrinh2001/chatapp/user-service/pkg/utils"
 )
 
 const (
@@ -14,13 +14,13 @@ const (
 )
 
 type service struct {
-	Repository
+	UserServiceClient
 	timeout time.Duration
 }
 
-func NewService(repository Repository) Service {
+func NewService(userService UserServiceClient) Service {
 	return &service{
-		repository,
+		userService,
 		time.Duration(2) * time.Second,
 	}
 }
@@ -35,19 +35,42 @@ func (s *service) CreateUser(c context.Context, request *CreateUserRequest) (*Cr
 		return nil, err
 	}
 
-	user := &User{
+	user := &user.CreateUserRequest{
 		Username: request.Username,
 		Email:    request.Email,
 		Password: hashedPassword,
 	}
 
-	u, err := s.Repository.CreateUser(ctx, user)
+	u, err := s.UserServiceClient.CreateUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
 	response := &CreateUserResponse{
-		ID:       strconv.Itoa(int(u.ID)),
+		ID:       u.Id,
+		Username: u.Username,
+		Email:    u.Email,
+	}
+
+	return response, nil
+}
+
+func (s *service) ChangeUsername(c context.Context, request *ChangeUsernameRequest) (*ChangeUsernameResponse, error) {
+	ctx, cancel := context.WithTimeout(c, s.timeout)
+	defer cancel()
+
+	req := &user.ChangeUsernameRequest{
+		Id:          request.ID,
+		NewUsername: request.NewUsername,
+	}
+
+	u, err := s.UserServiceClient.ChangeUsername(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ChangeUsernameResponse{
+		ID:       u.Id,
 		Username: u.Username,
 		Email:    u.Email,
 	}
@@ -65,7 +88,9 @@ func (s *service) Login(c context.Context, request *LoginUserRequest) (*LoginUse
 	ctx, cancel := context.WithTimeout(c, s.timeout)
 	defer cancel()
 
-	user, err := s.Repository.GetUserByEmail(ctx, request.Email)
+	req := &user.GetUserByEmailRequest{Email: request.Email}
+
+	user, err := s.UserServiceClient.GetUserByEmail(ctx, req)
 	if err != nil {
 		return &LoginUserResponse{}, err
 	}
@@ -77,10 +102,10 @@ func (s *service) Login(c context.Context, request *LoginUserRequest) (*LoginUse
 
 	// custom claims can be used for permissions and additional information of user
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, MyJWTClaims{
-		ID:       strconv.Itoa(int(user.ID)),
+		ID:       user.Id,
 		Username: user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Issuer:    strconv.Itoa(int(user.ID)),
+			Issuer:    user.Id,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		},
 	})
@@ -93,6 +118,6 @@ func (s *service) Login(c context.Context, request *LoginUserRequest) (*LoginUse
 	return &LoginUserResponse{
 		accessToken: secretString,
 		Username:    user.Username,
-		ID:          strconv.Itoa(int(user.ID)),
+		ID:          user.Id,
 	}, nil
 }

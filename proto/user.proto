@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option go_package = "proto/user";
+
+service User {
+	rpc GetUser(GetUserRequest) returns (GetUserResponse);
+	rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+	rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse);
+	rpc ChangeUsername(ChangeUsernameRequest) returns (ChangeUsernameResponse);
+
+}
+
+message GetUserRequest {
+	string id = 1;
+}
+
+message GetUserResponse {
+	string id = 1;
+	string username = 2;
+	string email = 3;
+}
+
+message CreateUserRequest {
+	string username = 1;
+	string email = 2;
+	string password = 3;
+}
+
+message CreateUserResponse {
+	string id = 1;
+	string username = 2;
+	string email = 3;
+}
+
+message GetUserByEmailRequest {
+	string email = 1;
+}
+
+message GetUserByEmailResponse {
+	string id = 1;
+	string username = 2;
+	string email = 3;
+	string password = 4;
+}
+
+message ChangeUsernameRequest {
+	string id = 1;
+	string newUsername = 2;
+}
+
+message ChangeUsernameResponse {
+	string id = 1;
+	string username = 2;
+	string email = 3;
+}

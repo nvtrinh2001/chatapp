@@ -1,13 +1,10 @@
 package user
 
-import "context"
+import (
+	"context"
 
-type User struct {
-	ID       int64  `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
+	"github.com/nvtrinh2001/chatapp/proto/user"
+)
 
 type CreateUserRequest struct {
 	Username string `json:"username"`
@@ -21,6 +18,16 @@ type CreateUserResponse struct {
 	Email    string `json:"email"`
 }
 
+type ChangeUsernameRequest struct {
+	ID          string `json:"id"`
+	NewUsername string `json:"new-username"`
+}
+
+type ChangeUsernameResponse struct {
+	ID       string `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
 type LoginUserRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -32,12 +39,14 @@ type LoginUserResponse struct {
 	Username    string `json:"username"`
 }
 
-type Repository interface {
-	CreateUser(ctx context.Context, user *User) (*User, error)
-	GetUserByEmail(ctx context.Context, email string) (*User, error)
+type UserServiceClient interface {
+	CreateUser(ctx context.Context, req *user.CreateUserRequest) (*user.CreateUserResponse, error)
+	GetUserByEmail(ctx context.Context, req *user.GetUserByEmailRequest) (*user.GetUserByEmailResponse, error)
+	ChangeUsername(ctx context.Context, req *user.ChangeUsernameRequest) (*user.ChangeUsernameResponse, error)
 }
 
 type Service interface {
 	CreateUser(c context.Context, request *CreateUserRequest) (*CreateUserResponse, error)
 	Login(c context.Context, request *LoginUserRequest) (*LoginUserResponse, error)
+	ChangeUsername(c context.Context, request *ChangeUsernameRequest) (*ChangeUsernameResponse, error)
 }

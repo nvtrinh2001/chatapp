@@ -32,10 +32,32 @@ func (r *repository) CreateUser(ctx context.Context, user *User) (*User, error) 
 	return user, nil
 }
 
+func (r *repository) ChangeUsername(ctx context.Context, id string, newUsername string) (*User, error) {
+	var user = User{}
+	query := "UPDATE USERS SET username = $1 WHERE id = $2 RETURNING id, username, email"
+	err := r.db.QueryRowContext(ctx, query, newUsername, id).Scan(&user.ID, &user.Username, &user.Email)
+	if err != nil {
+		return &User{}, err
+	}
+
+	return &user, nil
+}
+
 func (r *repository) GetUserByEmail(ctx context.Context, email string) (*User, error) {
 	user := User{}
 	query := "SELECT id, email, username, password FROM users WHERE email = $1"
 	err := r.db.QueryRowContext(ctx, query, email).Scan(&user.ID, &user.Email, &user.Username, &user.Password)
+	if err != nil {
+		return &User{}, nil
+	}
+
+	return &user, nil
+}
+
+func (r *repository) GetUserById(ctx context.Context, id string) (*User, error) {
+	user := User{}
+	query := "SELECT id, email, username, password FROM users WHERE id = $1"
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&user.ID, &user.Email, &user.Username, &user.Password)
 	if err != nil {
 		return &User{}, nil
 	}

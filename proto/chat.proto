@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option go_package = "proto/chat";
+
+service Chat {
+  rpc GetRooms(GetRoomsRequest) returns (GetRoomsResponse);
+  rpc CreateRoom(CreateRoomRequest) returns (CreateRoomResponse);
+  rpc GetClients(GetClientsRequest) returns (GetClientsResponse);
+}
+
+message GetRoomsRequest {}
+
+message Room {
+  string id = 1;
+  string name = 2;
+}
+
+message GetRoomsResponse { repeated Room rooms = 1; }
+
+message CreateRoomRequest { string name = 1; }
+
+message CreateRoomResponse {
+  string id = 1;
+  string name = 2;
+}
+
+message GetClientsRequest { string roomId = 1; }
+
+message Client {
+  string id = 1;
+  string username = 2;
+}
+
+message GetClientsResponse { repeated Client clients = 1; }
