@@ -22,8 +22,8 @@ func InitRouter(userHandler *user.Handler, chatHandler *chat.Handler) {
 	r.GET("/ws/rooms", chatHandler.GetRooms)
 	r.GET("/ws/clients/:roomId", chatHandler.GetClients)
 
-	// // websocket
-	// r.GET("/ws/joinRoom/:roomId", chatHandler.JoinRoom)
+	// websocket
+	r.GET("/ws/joinRoom/:roomId", chatHandler.JoinRoom)
 }
 
 func Start(addr string) error {
